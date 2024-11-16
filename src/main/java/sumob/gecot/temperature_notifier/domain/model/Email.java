@@ -1,6 +1,7 @@
 package sumob.gecot.temperature_notifier.domain.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Email {
@@ -9,7 +10,18 @@ public class Email {
     private Long id;
 
     @Column(unique = true)
+    @NotNull
+    @jakarta.validation.constraints.Email
     private String email;
+
+    // Construtor padrão
+    public Email() {
+    }
+
+    // Construtor com parâmetro
+    public Email(String email) {
+        this.email = email;
+    }
 
     public Long getId() {
         return id;
@@ -25,5 +37,26 @@ public class Email {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    @Override
+    public String toString() {
+        return "Email{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Email)) return false;
+        Email email1 = (Email) o;
+        return id != null && id.equals(email1.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31;
     }
 }

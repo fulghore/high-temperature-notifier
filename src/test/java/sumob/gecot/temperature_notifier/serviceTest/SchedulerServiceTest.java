@@ -46,7 +46,7 @@ public class SchedulerServiceTest {
     @Test
     void testCheckTemperature_DoesNotSendEmail_WhenTemperatureIsBelowThreshold() {
         // Arrange
-        double temperature = 15.0; // Temperatura abaixo do limite
+        double temperature = 5.0; // Temperatura abaixo do limite
         when(servicePrevision.getTemperature()).thenReturn(temperature);
 
         // Act

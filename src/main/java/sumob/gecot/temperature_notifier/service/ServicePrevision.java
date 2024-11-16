@@ -19,8 +19,8 @@ public class ServicePrevision {
 
     public double getTemperature() {
         String apiUrl = String.format(
-                "https://api.openweathermap.org/data/2.5/weather?q=Belo%%20Horizonte&appid=%s&units=metric",
-                apiKey
+                "https://api.openweathermap.org/data/2.5/weather?lat=-19.9208&lon=-43.9378&appid=%s&units=metric&lang=pt",
+                apiKey // Injeta o valor da API Key configurado
         );
 
         WeatherResponse response = restTemplate.getForObject(apiUrl, WeatherResponse.class);

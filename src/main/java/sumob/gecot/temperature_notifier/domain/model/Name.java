@@ -2,18 +2,27 @@ package sumob.gecot.temperature_notifier.domain.model;
 
 import jakarta.persistence.*;
 
-@Entity(name = "tb_user")
-public class User {
+@Entity
+public class Name {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, length = 50)
+    @Column(length = 50)
     private String name;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "email_id", referencedColumnName = "id") // define a chave estrangeira
+    @JoinColumn(name = "email_id", referencedColumnName = "id")
     private Email email;
+
+    // Construtor padrão
+    public Name() {
+    }
+
+    // Construtor que aceita um e-mail
+    public Name(String email) {
+        this.email = new Email(email); // Supondo que você tenha um construtor em Email que aceita um String
+    }
 
     public Long getId() {
         return id;

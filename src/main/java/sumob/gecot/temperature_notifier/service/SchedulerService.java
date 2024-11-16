@@ -13,16 +13,18 @@ public class SchedulerService {
     @Autowired
     private EmailService emailService;
 
-    // cron = "0 */30 * * * *" (todos os dias a cada 30 minutos)
-    @Scheduled(cron = "0 0,30 8-11,14-16 * * MON-FRI") // A cada 30 minutos nos horários especificados, dias úteis
+    @Scheduled//(cron = "0 0,30 8-11,14-16 * * MON-FRI") // A cada 30 minutos nos horários especificados, dias úteis
+            (fixedRate = 60000) //Todos os dias a cada 1 minuto
     public void checkTemperature() {
         try {
-            double temperature = servicePrevision.getTemperature();
-            if (temperature >= 20.0) {
-                emailService.sendEmail("Temperatura atual: " + temperature);
+            double currentTemperature = servicePrevision.getTemperature();
+            System.out.println("Temperatura atual: " + currentTemperature);
+
+            if (currentTemperature > 10) {
+                emailService.sendEmail("Temperatura atual: " + currentTemperature);
             }
         } catch (Exception e) {
-            System.err.println("Erro ao verificar temperatura ou enviar e-mail: " + e.getMessage());
+            System.out.println("Erro ao verificar a temperatura: " + e.getMessage());
         }
     }
 }
