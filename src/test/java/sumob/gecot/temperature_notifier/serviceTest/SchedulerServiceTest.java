@@ -32,7 +32,7 @@ public class SchedulerServiceTest {
     @Test
     void testCheckTemperature_SendsEmail_WhenTemperatureIsAboveThreshold() {
         // Arrange
-        double temperature = 20.0; // Temperatura acima do limite
+        double temperature = 35.0; // Temperatura acima do limite
         when(servicePrevision.getTemperature()).thenReturn(temperature);
         System.out.println("Temperatura atual: " + temperature);
 
@@ -40,7 +40,7 @@ public class SchedulerServiceTest {
         schedulerService.checkTemperature();
 
         // Assert
-        verify(emailService, times(1)).sendEmail("Temperatura atual: " + temperature);
+        verify(emailService, times(1)).sendEmail("Temperatura atual acima do limite: " + temperature);
     }
 
     @Test

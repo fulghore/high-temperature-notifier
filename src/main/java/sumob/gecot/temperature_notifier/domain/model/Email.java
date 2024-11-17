@@ -50,13 +50,13 @@ public class Email {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Email)) return false;
-        Email email1 = (Email) o;
-        return id != null && id.equals(email1.id);
+        if (!(o instanceof Email email1)) return false;
+        return id != null && id.equals(email1.id) && email.equals(email1.email);
     }
 
     @Override
     public int hashCode() {
-        return 31;
+        return 31 * (id != null ? id.hashCode() : 0) + (email != null ? email.hashCode() : 0);
     }
+
 }
