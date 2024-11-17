@@ -1,6 +1,8 @@
 package sumob.gecot.temperature_notifier.domain.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @Entity
 public class Name {
@@ -9,6 +11,8 @@ public class Name {
     private Long id;
 
     @Column(length = 50)
+    @NotNull
+    @Size(max = 50)
     private String name;
 
     @OneToOne(cascade = CascadeType.ALL)

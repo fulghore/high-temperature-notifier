@@ -30,3 +30,6 @@ spring:
       settings:
         trace: false
         web-allow-others: false
+steps:
+  - name: Run tests with JaCoCo
+    run: mvn clean verify
