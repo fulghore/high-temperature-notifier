@@ -41,7 +41,7 @@ public class EmailService {
 
         SimpleMailMessage email = new SimpleMailMessage();
         email.setTo(emails);
-        email.setSubject("Alerta de temperatura elevada");
+        email.setSubject("Alerta de Temperatura Elevada");
         email.setText(message);
 
         try {
