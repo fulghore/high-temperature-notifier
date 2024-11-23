@@ -27,3 +27,6 @@ spring:
 steps:
   - name: Run tests with JaCoCo
     run: mvn clean verify
+
+    profiles:
+        active: prod
