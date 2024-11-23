@@ -1,1 +1,1 @@
-web: java -jar out/artifacts/high_temperature_notifier_jar/high-temperature-notifier_jar.jar
+web: java -jar out/artifacts/high_temperature_notifier_jar/high-temperature-notifier.jar
