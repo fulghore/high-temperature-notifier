@@ -8,6 +8,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import sumob.gecot.temperature_notifier.dto.TemperatureInfo;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -23,41 +25,57 @@ public class SchedulerService {
     private EmailService emailService;
 
     // Definindo o limite de temperatura como uma constante
-    @Value("${temperature.threshold:20.0}")
+    @Value("${temperature.threshold:34.0}")
     private double temperatureThreshold;
 
-    @Scheduled(fixedRate = 60000) // A cada 1 minuto
+    @Scheduled(fixedRate = 1800000) // A cada 30 minutos
     public void checkTemperature() {
-        try {
-            List<TemperatureInfo> currentTemperatures = servicePrevision.getTemperatures(); // Chama o método correto
-            logger.info("Temperaturas atuais: {}", currentTemperatures);
+        // Verifica se hoje é um dia útil e se a hora está dentro do intervalo permitido
+        if (isWeekday() && isWithinTimeRange()) {
+            try {
+                List<TemperatureInfo> currentTemperatures = servicePrevision.getTemperatures(); // Chama o método correto
+                logger.info("Temperaturas atuais: {}", currentTemperatures);
 
-            // Determina a saudação com base na hora atual
-            String greeting = getGreeting();
-            StringBuilder messageBuilder = new StringBuilder(greeting + "\nPrezados supervisores,\n Segue abaixo alerta sobre as temperaturas atuais registradas nas localidades monitoradas. \n\n");
-            messageBuilder.append("Temperaturas atuais:\n\n");
+                // Determina a saudação com base na hora atual
+                String greeting = getGreeting();
+                StringBuilder messageBuilder = new StringBuilder(greeting + "\nPrezados supervisores,\n Segue abaixo alerta sobre as temperaturas atuais registradas nas localidades monitoradas.\n");
 
-            for (TemperatureInfo temperatureInfo : currentTemperatures) {
-                messageBuilder.append(temperatureInfo.getLocationName())
-                        .append(": ").append(temperatureInfo.getTemperature()).append("°C\n");
+                // Verifica se alguma temperatura está acima do limite
+                boolean isAboveThreshold = currentTemperatures.stream()
+                        .anyMatch(tempInfo -> tempInfo.getTemperature() > temperatureThreshold);
+
+                if (isAboveThreshold) {
+                    messageBuilder.append("\nAtenção: Uma ou mais temperaturas estão acima do limite de ")
+                            .append(temperatureThreshold).append("°C.\n\n");
+                }
+
+                messageBuilder.append("Temperaturas atuais:\n\n");
+
+                for (TemperatureInfo temperatureInfo : currentTemperatures) {
+                    messageBuilder.append(temperatureInfo.getLocationName())
+                            .append(": ").append(temperatureInfo.getTemperature()).append("°C\n");
+                }
+
+                // Envia um único e-mail com todas as temperaturas
+                emailService.sendEmail(messageBuilder.toString());
+                logger.info("E-mail enviado com as temperaturas atuais.");
+
+            } catch (Exception e) {
+                logger.error("Erro ao verificar a temperatura: {}", e.getMessage());
             }
-
-            // Verifica se alguma temperatura está acima do limite
-            boolean isAboveThreshold = currentTemperatures.stream()
-                    .anyMatch(tempInfo -> tempInfo.getTemperature() > temperatureThreshold);
-
-            if (isAboveThreshold) {
-                messageBuilder.append("\nAtenção: Uma ou mais temperaturas estão acima do limite de ")
-                        .append(temperatureThreshold).append("°C.");
-            }
-
-            // Envia um único e-mail com todas as temperaturas
-            emailService.sendEmail(messageBuilder.toString());
-            logger.info("E-mail enviado com as temperaturas atuais.");
-
-        } catch (Exception e) {
-            logger.error("Erro ao verificar a temperatura: {}", e.getMessage());
+        } else {
+            logger.info("Método checkTemperature não executado: fora do horário permitido ou não é dia útil.");
         }
+    }
+
+    private boolean isWeekday() {
+        DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
+        return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY; // Verifica se não é sábado ou domingo
+    }
+
+    private boolean isWithinTimeRange() {
+        LocalTime now = LocalTime.now();
+        return now.isAfter(LocalTime.of(11, 0)) && now.isBefore(LocalTime.of(17, 0)); // Verifica se está entre 11:00 e 17:00
     }
 
     private String getGreeting() {

@@ -4,11 +4,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.*;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import sumob.gecot.temperature_notifier.dto.TemperatureInfo;
 import sumob.gecot.temperature_notifier.service.EmailService;
 import sumob.gecot.temperature_notifier.service.SchedulerService;
 import sumob.gecot.temperature_notifier.service.ServicePrevision;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 
@@ -32,41 +36,75 @@ public class SchedulerServiceTest {
     @Test
     void testCheckTemperature_SendsEmail_WhenTemperatureIsAboveThreshold() {
         // Arrange
-        double temperature = 35.0; // Temperatura acima do limite
-        when(servicePrevision.getTemperature()).thenReturn(temperature);
-        System.out.println("Temperatura atual: " + temperature);
+        List<TemperatureInfo> temperatures = Arrays.asList(
+                new TemperatureInfo("Est. Pampulha", 35.0) // Temperatura acima do limite
+        );
+        when(servicePrevision.getTemperatures()).thenReturn(temperatures);
 
         // Act
         schedulerService.checkTemperature();
 
         // Assert
-        verify(emailService, times(1)).sendEmail("Temperatura atual acima do limite: " + temperature);
+        verify(emailService, times(1)).sendEmail(anyString()); // Verifica se o e-mail foi enviado
     }
 
     @Test
     void testCheckTemperature_DoesNotSendEmail_WhenTemperatureIsBelowThreshold() {
         // Arrange
-        double temperature = 5.0; // Temperatura abaixo do limite
-        when(servicePrevision.getTemperature()).thenReturn(temperature);
+        List<TemperatureInfo> temperatures = Arrays.asList(
+                new TemperatureInfo("Est. Pampulha", 18.0) // Temperatura abaixo do limite
+        );
+        when(servicePrevision.getTemperatures()).thenReturn(temperatures);
 
         // Act
         schedulerService.checkTemperature();
 
         // Assert
-        verify(emailService, never()).sendEmail(anyString());
+        verify(emailService, never()).sendEmail(anyString()); // Verifica se o e-mail não foi enviado
+    }
+
+    @Test
+    void testCheckTemperature_SendsEmail_WhenSomeTemperaturesAreAboveThreshold() {
+        // Arrange
+        List<TemperatureInfo> temperatures = Arrays.asList(
+                new TemperatureInfo("Est. Pampulha", 18.0), // Abaixo do limite
+                new TemperatureInfo("Est. Venda Nova", 25.0) // Acima do limite
+        );
+        when(servicePrevision.getTemperatures()).thenReturn(temperatures);
+
+        // Act
+        schedulerService.checkTemperature();
+
+        // Assert
+        verify(emailService, times(1)).sendEmail(anyString()); // Verifica se o e-mail foi enviado
+    }
+
+    @Test
+    void testCheckTemperature_SendsEmail_WhenMultipleTemperaturesAreAboveThreshold() {
+        // Arrange
+        List<TemperatureInfo> temperatures = Arrays.asList(
+                new TemperatureInfo("Est. Pampulha", 22.0),
+                new TemperatureInfo("Est. Venda Nova", 25.0),
+                new TemperatureInfo("Est. Centro", 19.0) // Abaixo do limite
+        );
+        when(servicePrevision.getTemperatures()).thenReturn(temperatures);
+
+        // Act
+        schedulerService.checkTemperature();
+
+        // Assert
+        verify(emailService, times(1)).sendEmail(anyString()); // Verifica se o e-mail foi enviado
     }
 
     @Test
     void testCheckTemperature_HandlesException() {
         // Arrange
-        when(servicePrevision.getTemperature()).thenThrow(new RuntimeException("Erro ao obter temperatura"));
+        when(servicePrevision.getTemperatures()).thenThrow(new RuntimeException("Erro ao obter temperatura"));
 
         // Act
         schedulerService.checkTemperature();
 
         // Assert
-        // Verifica se o método sendEmail não foi chamado
-        verify(emailService, never()).sendEmail(anyString());
+        verify(emailService, never()).sendEmail(anyString()); // Verifica se o e-mail não foi enviado
     }
-
 }

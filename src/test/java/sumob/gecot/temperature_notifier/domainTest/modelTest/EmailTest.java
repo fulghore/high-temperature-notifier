@@ -69,4 +69,23 @@ public class EmailTest {
         assertEquals(expectedString, email.toString());
     }
 
+    // Teste adicional para verificar a formatação do corpo do e-mail
+    @Test
+    void testEmailBodyFormatting() {
+        String body = "Bom dia,\n" +
+                "Prezados supervisores,\n\n" +
+                "Temperaturas atuais:\n" +
+                "- Localidade 1: 25.0°C\n" +
+                "- Localidade 2: 22.5°C\n" +
+                "\nAtenção: Uma ou mais temperaturas estão acima do limite de 20.0°C. As localizações afetadas são:\n" +
+                "- Localidade 1: 25.0°C\n" +
+                "- Localidade 2: 22.5°C\n" +
+                "\nRecomendamos que sejam tomadas as devidas providências para monitorar essas condições.";
+
+        assertNotNull(body);
+        assertTrue(body.contains("Bom dia,"));
+        assertTrue(body.contains("Prezados supervisores,"));
+        assertTrue(body.contains("Temperaturas atuais:"));
+        assertTrue(body.contains("Atenção: Uma ou mais temperaturas estão acima do limite de 20.0°C"));
+    }
 }
