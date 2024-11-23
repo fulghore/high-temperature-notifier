@@ -89,13 +89,26 @@
         </dependency>
     </dependencies>
 
-
     <build>
         <plugins>
             <!-- Spring Boot Maven Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- Maven Jar Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version> <!-- Use a versão mais recente -->
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>sumob.gecot.temperature_notifier.TemperatureNotifierApplication</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
             </plugin>
 
             <!-- JaCoCo Plugin for Code Coverage -->
