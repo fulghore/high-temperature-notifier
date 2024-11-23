@@ -24,9 +24,13 @@ spring:
       hibernate:
         format_sql: true
 
+  server:
+    port: 8080
+
 steps:
   - name: Run tests with JaCoCo
     run: mvn clean verify
 
     profiles:
         active: prod
+
