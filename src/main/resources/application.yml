@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: temperature-notifier
+  main:
+    web-application-type: servlet
+server:
+  port: 8080

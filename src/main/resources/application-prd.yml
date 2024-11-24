@@ -1,4 +1,9 @@
 spring:
+  application:
+    name: temperature-notifier
+  main:
+    web-application-type: servlet
+
   mail:
     host: ${MAIL_HOST}
     port: ${MAIL_PORT}
@@ -10,7 +15,6 @@ spring:
           auth: true
           starttls:
             enable: true
-
   datasource:
     url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
     username: ${PGUSER}
@@ -24,12 +28,6 @@ spring:
       hibernate:
         format_sql: true
 
-  server:
-    port: 8080
-
 steps:
   - name: Run tests with JaCoCo
     run: mvn clean verify
-
-    profiles:
-        active: prod
