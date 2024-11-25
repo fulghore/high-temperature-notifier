@@ -36,29 +36,31 @@ public class SchedulerService {
                 List<TemperatureInfo> currentTemperatures = servicePrevision.getTemperatures(); // Chama o método correto
                 logger.info("Temperaturas atuais: {}", currentTemperatures);
 
-                // Determina a saudação com base na hora atual
-                String greeting = getGreeting();
-                StringBuilder messageBuilder = new StringBuilder(greeting + "\nPrezados supervisores,\n Segue abaixo alerta sobre as temperaturas atuais registradas nas localidades monitoradas.\n");
-
                 // Verifica se alguma temperatura está acima do limite
                 boolean isAboveThreshold = currentTemperatures.stream()
                         .anyMatch(tempInfo -> tempInfo.getTemperature() > temperatureThreshold);
 
                 if (isAboveThreshold) {
+                    // Determina a saudação com base na hora atual
+                    String greeting = getGreeting();
+                    StringBuilder messageBuilder = new StringBuilder(greeting + "\nPrezados supervisores,\n Segue abaixo alerta sobre as temperaturas atuais registradas nas localidades monitoradas.\n");
+
                     messageBuilder.append("\nAtenção: Uma ou mais temperaturas estão acima do limite de ")
                             .append(temperatureThreshold).append("°C.\n\n");
+
+                    messageBuilder.append("Temperaturas atuais:\n\n");
+
+                    for (TemperatureInfo temperatureInfo : currentTemperatures) {
+                        messageBuilder.append(temperatureInfo.getLocationName())
+                                .append(": ").append(temperatureInfo.getTemperature()).append("°C\n");
+                    }
+
+                    // Envia um único e-mail com todas as temperaturas
+                    emailService.sendEmail(messageBuilder.toString());
+                    logger.info("E-mail enviado com as temperaturas atuais.");
+                } else {
+                    logger.info("Nenhuma temperatura acima do limite de {}°C. E-mail não enviado.", temperatureThreshold);
                 }
-
-                messageBuilder.append("Temperaturas atuais:\n\n");
-
-                for (TemperatureInfo temperatureInfo : currentTemperatures) {
-                    messageBuilder.append(temperatureInfo.getLocationName())
-                            .append(": ").append(temperatureInfo.getTemperature()).append("°C\n");
-                }
-
-                // Envia um único e-mail com todas as temperaturas
-                emailService.sendEmail(messageBuilder.toString());
-                logger.info("E-mail enviado com as temperaturas atuais.");
 
             } catch (Exception e) {
                 logger.error("Erro ao verificar a temperatura: {}", e.getMessage());
