@@ -12,11 +12,14 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.time.*;
 
 @Service
 public class SchedulerService {
 
     private static final Logger logger = LoggerFactory.getLogger(SchedulerService.class);
+
+    private static final ZoneId SAO_PAULO_ZONE = ZoneId.of("America/Sao_Paulo");
 
     @Autowired
     private ServicePrevision servicePrevision;
@@ -24,28 +27,24 @@ public class SchedulerService {
     @Autowired
     private EmailService emailService;
 
-    // Definindo o limite de temperatura como uma constante
     @Value("${temperature.threshold:34.0}")
     private double temperatureThreshold;
 
     @Scheduled(fixedRate = 1800000) // A cada 30 minutos
     public void checkTemperature() {
-        // Verifica se hoje é um dia útil e se a hora está dentro do intervalo permitido
         if (isWeekday() && isWithinTimeRange()) {
             try {
-                List<TemperatureInfo> currentTemperatures = servicePrevision.getTemperatures(); // Chama o método correto
+                List<TemperatureInfo> currentTemperatures = servicePrevision.getTemperatures();
                 logger.info("Temperaturas atuais: {}", currentTemperatures);
 
-                // Verifica se alguma temperatura está acima do limite
                 boolean isAboveThreshold = currentTemperatures.stream()
                         .anyMatch(tempInfo -> tempInfo.getTemperature() > temperatureThreshold);
 
                 if (isAboveThreshold) {
-                    // Determina a saudação com base na hora atual
                     String greeting = getGreeting();
-                    StringBuilder messageBuilder = new StringBuilder(greeting + "\nPrezados supervisores,\n Segue abaixo alerta sobre as temperaturas atuais registradas nas localidades monitoradas.\n");
-
-                    messageBuilder.append("\nAtenção: Uma ou mais temperaturas estão acima do limite de ")
+                    StringBuilder messageBuilder = new StringBuilder(greeting)
+                            .append("Prezados supervisores,\nSegue abaixo alerta sobre as temperaturas atuais registradas nas localidades monitoradas.\n")
+                            .append("\nAtenção: Uma ou mais temperaturas estão acima do limite de ")
                             .append(temperatureThreshold).append("°C.\n\n");
 
                     messageBuilder.append("Temperaturas atuais:\n\n");
@@ -55,7 +54,6 @@ public class SchedulerService {
                                 .append(": ").append(temperatureInfo.getTemperature()).append("°C\n");
                     }
 
-                    // Envia um único e-mail com todas as temperaturas
                     emailService.sendEmail(messageBuilder.toString());
                     logger.info("E-mail enviado com as temperaturas atuais.");
                 } else {
@@ -71,21 +69,17 @@ public class SchedulerService {
     }
 
     private boolean isWeekday() {
-        DayOfWeek dayOfWeek = LocalDate.now().getDayOfWeek();
-        return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY; // Verifica se não é sábado ou domingo
+        DayOfWeek dayOfWeek = LocalDate.now(SAO_PAULO_ZONE).getDayOfWeek();
+        return dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY;
     }
 
     private boolean isWithinTimeRange() {
-        LocalTime now = LocalTime.now();
-        return now.isAfter(LocalTime.of(11, 0)) && now.isBefore(LocalTime.of(17, 0)); // Verifica se está entre 11:00 e 17:00
+        LocalTime now = LocalTime.now(SAO_PAULO_ZONE);
+        return now.isAfter(LocalTime.of(11, 0)) && now.isBefore(LocalTime.of(17, 0));
     }
 
     private String getGreeting() {
-        LocalTime now = LocalTime.now();
-        if (now.isBefore(LocalTime.NOON)) {
-            return "Bom dia.\n";
-        } else {
-            return "Boa tarde.\n";
-        }
+        LocalTime now = LocalTime.now(SAO_PAULO_ZONE);
+        return now.isBefore(LocalTime.NOON) ? "Bom dia.\n" : "Boa tarde.\n";
     }
 }
